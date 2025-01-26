@@ -4,4 +4,4 @@ This experiment is to understand the market behaviour of product makers, sellers
 
 To access to project, please download the zip file. 
 
-To access to the [python code]() and [html codes]() please access to this [file](). 
+To access to the [python code](https://github.com/FurkanDanisman/Otree/blob/main/ledger_demo/__init__.py) and html codes please access to [ledger_demo](https://github.com/FurkanDanisman/Otree/tree/main/ledger_demo). 
