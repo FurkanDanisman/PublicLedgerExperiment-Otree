@@ -1,0 +1,20 @@
+{% block title %}Decide on Offers{% endblock %}
+{% block content %}
+<p>Ledger:</p>
+<ul>
+  {% for item in ledger %}
+    <li>{{ item }}</li>
+  {% endfor %}
+</ul>
+<p>{{ instructions }}</p>
+  <ul>
+    {% for seller in sellers %}
+      <li>
+        Seller {{ seller.id }}: Offered {{ seller.offer }} Tokens {{ formfield  seller.form_field }}
+      </li>
+    {% endfor %}
+  </ul>
+    <p>
+        {{ next_button }}
+    </p>
+{% endblock %}

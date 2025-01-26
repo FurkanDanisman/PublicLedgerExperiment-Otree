@@ -1,0 +1,9 @@
+{% block title %}Ledger{% endblock %}
+{% block content %}
+<p>Ledger:</p>
+<ul>
+  {% for item in ledger %}
+    <li>{{ item }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

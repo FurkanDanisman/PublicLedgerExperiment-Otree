@@ -1,0 +1,203 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+    <h3>Buy Products</h3>
+    <p>{{ instructions }}</p>
+
+<h4>Transaction Ledger</h4>
+    <table class="table">
+        <tr>
+            <th>Round</th>
+            <th>Transaction Type</th>
+            <th>Buyer</th>
+            <th>Seller</th>
+            <th>Tokens Exchanged</th>
+            <th>Quantity</th>
+        </tr>
+
+        {% for entry in ledger %}
+        <tr>
+            <td>{{ entry.round }}</td>
+            <td>{{ entry.type }}</td>
+            <td>{{ entry.buyer_role }} ({{ entry.buyer_id }})</td>
+            <td>{{ entry.seller_role }} ({{ entry.seller_id }})</td>
+            <td>{{ entry.amount }}</td>
+            <td>{{ entry.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+<h3>Buy Products - Second Buyer</h3>
+<p>You are ranked <strong>2nd</strong>. You get to buy second.</p>
+
+<table class="table">
+    <tr>
+        <th>Seller</th>
+        <th>Price per Product</th>
+        <th>Available Stock</th>
+        <th>Do you want to buy?</th>
+        <th>Quantity (if Yes)</th>
+    </tr>
+
+    {% for seller in sellers %}
+    <tr>
+        <td>Seller {{ seller.id }}</td>
+        <td>{{ seller.price }} Tokens</td>
+        <td id="stock_{{ seller.id }}">{{ seller.stock }}</td>
+        <td>
+            <label>
+                <input type="radio" name="b2_buy_decision_a{{ seller.adjusted_id }}" value="Yes" onclick="showQuantity({{ seller.id }})"> Yes
+            </label>
+            <label>
+                <input type="radio" name="b2_buy_decision_a{{ seller.adjusted_id }}" value="No" onclick="hideQuantity({{ seller.id }})" checked> No
+            </label>
+        </td>
+        <td>
+            <input type="number" id="quantity_{{ seller.id }}" name="b2_buy_amount_a{{ seller.adjusted_id }}" min="1" max="{{ seller.stock }}" style="display:none;" oninput="validateAllPurchases()">
+            <span id="error_{{ seller.id }}" style="color: red; display: none;">Error: Not enough stock!</span>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<p id="error_global" style="color: red; display: none;">Error: You do not have enough tokens or stock is unavailable!</p>
+
+<form id="buyForm" onsubmit="return submitPurchase()">
+    <button type="submit" id="buyButton" disabled>Submit</button>
+</form>
+
+<script>
+    let buyerTokens = {{ player.tokens }};  // Get buyer's total tokens
+    let stockLevels = {};  // Store current stock for real-time updates
+    let sellerPrices = {};  // Store seller prices for calculation
+
+    {% for seller in sellers %}
+        stockLevels[{{ seller.id }}] = {{ seller.stock }};
+        sellerPrices[{{ seller.id }}] = {{ seller.price }};
+    {% endfor %}
+
+    function showQuantity(seller_id) {
+        let quantityField = document.getElementById('quantity_' + seller_id);
+        quantityField.style.display = 'block';
+        quantityField.value = "";
+        document.getElementById('error_' + seller_id).style.display = 'none';
+        validateAllPurchases();
+    }
+
+    function hideQuantity(seller_id) {
+        let quantityField = document.getElementById('quantity_' + seller_id);
+        quantityField.style.display = 'none';
+        quantityField.value = "";  // Reset to blank if user chooses "No"
+        document.getElementById('error_' + seller_id).style.display = 'none';
+        validateAllPurchases();
+    }
+
+    function validateAllPurchases() {
+        let totalCost = 0;
+        let valid = true;
+        let hasSelection = false;
+
+        for (let seller_id in stockLevels) {
+            let quantityField = document.getElementById('quantity_' + seller_id);
+            let errorMsg = document.getElementById('error_' + seller_id);
+            let quantity = parseInt(quantityField.value) || 0;
+            let availableStock = stockLevels[seller_id];
+
+            if (quantity > availableStock) {
+                errorMsg.style.display = 'block';
+                valid = false;
+            } else {
+                errorMsg.style.display = 'none';
+            }
+
+            if (quantity > 0) {
+                hasSelection = true;
+            }
+
+            totalCost += quantity * sellerPrices[seller_id];
+        }
+
+        let errorGlobal = document.getElementById('error_global');
+        if (totalCost > buyerTokens) {
+            errorGlobal.style.display = 'block';
+            valid = false;
+        } else {
+            errorGlobal.style.display = 'none';
+        }
+
+        document.getElementById('buyButton').disabled = !valid;
+    }
+
+    function submitPurchase() {
+        let purchases = [];
+        let stockError = false;
+
+        for (let seller_id in stockLevels) {
+            let quantityField = document.getElementById('quantity_' + seller_id);
+            let quantity = parseInt(quantityField.value) || 0;
+
+            if (quantity > stockLevels[seller_id]) {
+                alert(`Error: Not enough stock from Seller ${seller_id}`);
+                stockError = true;
+                break;
+            }
+
+            if (quantity > 0) {
+                purchases.push({
+                    seller_id: seller_id,
+                    quantity: quantity
+                });
+            }
+        }
+
+        if (stockError) {
+            return false; // **Blocks submission if stock is not enough**
+        }
+
+        fetch("/update_stock", {  // Send stock update to the server
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ purchases: purchases })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateStockDisplay(data.new_stock);
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error updating stock:", error);
+        });
+
+        return false;  // **Prevents page reset**
+    }
+
+    function updateStockDisplay(newStock) {
+        for (let seller_id in newStock) {
+            stockLevels[seller_id] = newStock[seller_id];
+            document.getElementById('stock_' + seller_id).innerText = newStock[seller_id];
+        }
+        validateAllPurchases();  // Revalidate after stock update
+    }
+
+    function fetchUpdatedStock() {
+        fetch("/get_stock")
+        .then(response => response.json())
+        .then(data => {
+            updateStockDisplay(data.stock);
+        })
+        .catch(error => {
+            console.error("Error fetching stock:", error);
+        });
+    }
+
+    // **FIX: Now fetches the latest stock immediately when the page loads!**
+    fetchUpdatedStock();
+
+    setInterval(fetchUpdatedStock, 3000);  // Fetch new stock every 3 seconds
+
+</script>
+
+{% endblock %}

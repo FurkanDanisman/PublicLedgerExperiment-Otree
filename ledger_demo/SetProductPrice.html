@@ -1,0 +1,31 @@
+{% block title %}Set Product Price{% endblock %}
+{% block content %}
+<h1>Set Your Product Price</h1>
+    <h4>Transaction Ledger</h4>
+    <table class="table">
+        <tr>
+            <th>Round</th>
+            <th>Transaction Type</th>
+            <th>Buyer</th>
+            <th>Seller</th>
+            <th>Tokens Exchanged</th>
+            <th>Quantity</th>
+        </tr>
+
+        {% for entry in ledger %}
+        <tr>
+            <td>{{ entry.round }}</td>
+            <td>{{ entry.type }}</td>
+            <td>{{ entry.buyer_role }} ({{ entry.buyer_id }})</td>
+            <td>{{ entry.seller_role }} ({{ entry.seller_id }})</td>
+            <td>{{ entry.amount }}</td>
+            <td>{{ entry.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+<p>{{ instructions }}</p>
+{{ formfields }}
+    <p>
+        {{ next_button }}
+    </p>
+{% endblock %}

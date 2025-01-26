@@ -1,0 +1,22 @@
+{% block title %}{% endblock %}
+{% block content %}
+<h1>Welcome to the Market Experiment</h1>
+<p>Your role: {{ player.position }}</p>
+<p>Instructions:</p>
+<ul>
+  <li>Producers sell bases to sellers.</li>
+  <li>Sellers produce products and sell them to buyers.</li>
+  <li>Buyers purchase products and earn points for consumption.</li>
+</ul>
+{% if treatment == 'correct' %}
+<h3>Suggestions:</h3>
+<ul>
+  <li>1 Base is around {{ base_price_suggestion }} Tokens.</li>
+  <li>1 Product is around {{ product_price_suggestion }} Tokens.</li>
+</ul>
+{% endif %}
+<p>Click below to begin:</p>
+    <p>
+        {{ next_button }}
+    </p>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+<h3>Guess the Number</h3>
+<p>A random number between 1 and 100 has been generated. Your task is to guess the closest number.</p>
+
+<form method="post">
+    {{ formfield 'guess' }}
+    <button type="submit">Submit Guess</button>
+</form>
+
+{% endblock %}

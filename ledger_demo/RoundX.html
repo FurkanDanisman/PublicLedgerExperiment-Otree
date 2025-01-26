@@ -1,0 +1,13 @@
+<h2>Round {{ round_number }}</h2>
+<p>Your Role: {{ player.role }}</p>
+<p>Public Ledger:</p>
+<ul>
+    {% for entry in ledger %}
+        <li>{{ entry }}</li>
+    {% endfor %}
+</ul>
+
+<form method="post">
+    {% formfields %}
+    <button type="submit">Submit</button>
+</form>

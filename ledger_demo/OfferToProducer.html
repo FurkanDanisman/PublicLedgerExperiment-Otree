@@ -1,0 +1,16 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+    <h3>Make an Offer to the Producer</h3>
+    <p>{{ instructions }}</p>
+
+    <label for="offer_to_producer">Choose how many tokens you want to offer (1-3):</label>
+    <select name="offer_to_producer" required>
+        <option value="1">1 Token</option>
+        <option value="2">2 Tokens</option>
+        <option value="3">3 Tokens</option>
+    </select>
+
+    <button type="submit">Submit Offer</button>
+
+{% endblock %}

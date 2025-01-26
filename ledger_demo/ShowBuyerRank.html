@@ -1,0 +1,25 @@
+{% extends "global/Page.html" %}
+{% block content %}
+
+<h3>Buyer Ranking Results</h3>
+<p>The system has ranked all buyers based on their guessing accuracy.</p>
+
+<h4>The generated random number was: <strong>{{ random_number }}</strong></h4>
+
+<p>Your guess was {{ guessed_number }} compared to {{ random_number }}, and based on accuracy, your ranking is:</p>
+
+<h2>You are ranked <strong>{{ rank_index }}</strong> out of 3 buyers.</h2>
+
+<p>Buyers will now proceed in this order:</p>
+
+<ol>
+    {% for buyer_id in buyer_order %}
+        <li>Buyer {{ buyer_id }}</li>
+    {% endfor %}
+</ol>
+
+<p>You will buy when it's your turn. The first buyer will now proceed.</p>
+
+<button type="submit">Continue</button>
+
+{% endblock %}
